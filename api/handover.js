@@ -93,7 +93,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Keep the API key server-side and never include it in a response or log.
+    // Keep the trimmed API key server-side and never include it in a response or log.
     const apiKey = process.env.AI_API_KEY?.trim();
     if (!apiKey) {
       return sendJson(res, 500, {
@@ -101,24 +101,25 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Ask Gemini for a JSON-only handover report.
-    const endpoint = new URL(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-    );
-    endpoint.searchParams.set("key", apiKey);
+    // Ask Groq for a JSON-only handover report.
+    const endpoint = "https://api.groq.com/openai/v1/chat/completions";
 
     let upstream;
     try {
       upstream = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + process.env.AI_API_KEY.trim(),
+        },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ role: "user", parts: [{ text: body.notes }] }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: "application/json",
-          },
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: body.notes },
+          ],
+          temperature: 0.1,
+          response_format: { type: "json_object" },
         }),
       });
     } catch {
@@ -131,7 +132,7 @@ module.exports = async function handler(req, res) {
     if (!upstream.ok) {
       const responseBodyText = await upstream.text();
       const safeResponseBody = redactApiKey(responseBodyText, apiKey);
-      console.error("Gemini API request failed", {
+      console.error("Groq API request failed", {
         status: upstream.status,
         responseBody: safeResponseBody,
       });
@@ -142,6 +143,8 @@ module.exports = async function handler(req, res) {
         upstreamMessage =
           typeof errorBody?.error?.message === "string"
             ? errorBody.error.message
+            : typeof errorBody?.error === "string"
+              ? errorBody.error
             : "";
       } catch {
         upstreamMessage = safeResponseBody.trim();
@@ -153,7 +156,7 @@ module.exports = async function handler(req, res) {
 
       return sendJson(res, 502, {
         error: "The handover report could not be generated. Please try again.",
-        detail: `Gemini returned HTTP ${upstream.status}: ${detailMessage}`,
+        detail: `Groq returned HTTP ${upstream.status}: ${detailMessage}`,
       });
     }
 
@@ -166,17 +169,12 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const responseParts = upstreamBody?.candidates?.[0]?.content?.parts;
-    const generatedText = Array.isArray(responseParts)
-      ? responseParts
-          .map((part) => (typeof part?.text === "string" ? part.text : ""))
-          .join("")
-      : "";
+    const generatedText = upstreamBody?.choices?.[0]?.message?.content;
 
     // Reject missing or malformed model output with a friendly gateway error.
     let report;
     try {
-      if (!generatedText) {
+      if (typeof generatedText !== "string" || !generatedText.trim()) {
         throw new Error("Empty model response");
       }
       report = JSON.parse(generatedText);
