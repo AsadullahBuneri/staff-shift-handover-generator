@@ -24,14 +24,28 @@
         <textarea
           id="notes"
           name="notes"
+          aria-describedby="notesCounter"
           rows="10"
           placeholder="Bed 15: Fever went down, give antibiotics at 6 PM.
 Bed 17: Waiting for MRI results."
         ></textarea>
+        <p id="notesCounter" class="character-counter" aria-live="polite">
+          0/5000 characters
+        </p>
+        <div class="fictional-data-confirmation">
+          <input
+            id="fictionalDataConfirmation"
+            name="fictionalDataConfirmation"
+            type="checkbox"
+          />
+          <label for="fictionalDataConfirmation">
+            I confirm these notes are fictional and contain no real patient information.
+          </label>
+        </div>
 
         <div>
           <button id="generateBtn" type="button">Generate Handover Report</button>
-          <button id="sampleBtn" type="button">Load Sample Notes</button>
+          <button id="sampleBtn" type="button">Load Example</button>
           <button id="clearBtn" type="button">Clear</button>
         </div>
       </section>
@@ -55,9 +69,10 @@ Bed 17: Waiting for MRI results."
 
     <footer>
       <p>
-        This tool is for drafting support only. Verify all information and follow
-        your hospital’s handover procedures; do not include identifying patient
-        information unless permitted by your organization.
+        Use fictional notes only; do not enter real patient information. This AI
+        output is an unverified draft, not medical advice. Check every detail,
+        especially medication instructions, and follow your hospital’s handover
+        procedures.
       </p>
     </footer>
   </body>
