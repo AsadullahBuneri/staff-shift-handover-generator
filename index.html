@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Create clear, organized shift handover reports for hospital staff."
+    />
+    <title>AI Shift Handover Note Generator</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>AI Shift Handover Note Generator</h1>
+      <p>Turn your shift notes into a clear handover report for your care team.</p>
+    </header>
+
+    <main>
+      <section aria-labelledby="notesHeading">
+        <h2 id="notesHeading">Enter shift notes</h2>
+        <label for="notes">Patient notes</label>
+        <textarea
+          id="notes"
+          name="notes"
+          rows="10"
+          placeholder="Bed 15: Fever went down, give antibiotics at 6 PM.
+Bed 17: Waiting for MRI results."
+        ></textarea>
+
+        <div>
+          <button id="generateBtn" type="button">Generate Handover Report</button>
+          <button id="sampleBtn" type="button">Load Sample Notes</button>
+          <button id="clearBtn" type="button">Clear</button>
+        </div>
+      </section>
+
+      <div id="loading" role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Generating handover report…</span>
+      </div>
+
+      <div id="error" role="alert" aria-live="assertive" hidden></div>
+
+      <section id="results" aria-labelledby="resultsHeading" hidden>
+        <h2 id="resultsHeading">Handover Report</h2>
+        <div id="reportContainer"></div>
+        <div>
+          <button id="copyBtn" type="button">Copy Report</button>
+          <button id="printBtn" type="button">Print</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        This tool is for drafting support only. Verify all information and follow
+        your hospital’s handover procedures; do not include identifying patient
+        information unless permitted by your organization.
+      </p>
+    </footer>
+  </body>
+</html>
