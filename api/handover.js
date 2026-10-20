@@ -62,6 +62,14 @@ function isValidReport(report) {
   );
 }
 
+// Remove the credential if an upstream error unexpectedly echoes it.
+function redactApiKey(text, apiKey) {
+  return [apiKey, encodeURIComponent(apiKey)].reduce(
+    (safeText, secret) => safeText.split(secret).join("[REDACTED]"),
+    text,
+  );
+}
+
 module.exports = async function handler(req, res) {
   // This endpoint only handles POST requests.
   if (req.method !== "POST") {
@@ -86,7 +94,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Keep the API key server-side and never include it in a response or log.
-    const apiKey = process.env.AI_API_KEY;
+    const apiKey = process.env.AI_API_KEY?.trim();
     if (!apiKey) {
       return sendJson(res, 500, {
         error: "The handover service is not configured. Please try again later.",
@@ -119,10 +127,33 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Do not expose provider errors or response details to the client.
+    // Include sanitized provider diagnostics for troubleshooting failed requests.
     if (!upstream.ok) {
+      const responseBodyText = await upstream.text();
+      const safeResponseBody = redactApiKey(responseBodyText, apiKey);
+      console.error("Gemini API request failed", {
+        status: upstream.status,
+        responseBody: safeResponseBody,
+      });
+
+      let upstreamMessage = "";
+      try {
+        const errorBody = JSON.parse(safeResponseBody);
+        upstreamMessage =
+          typeof errorBody?.error?.message === "string"
+            ? errorBody.error.message
+            : "";
+      } catch {
+        upstreamMessage = safeResponseBody.trim();
+      }
+
+      const detailMessage = (upstreamMessage || upstream.statusText || "Request failed")
+        .replace(/\s+/g, " ")
+        .slice(0, 240);
+
       return sendJson(res, 502, {
         error: "The handover report could not be generated. Please try again.",
+        detail: `Gemini returned HTTP ${upstream.status}: ${detailMessage}`,
       });
     }
 
