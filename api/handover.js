@@ -1,3 +1,5 @@
+const MODEL_NAME = "openai/gpt-oss-120b";
+
 const SYSTEM_PROMPT = `You are a clinical documentation assistant. Convert rough shift notes into a structured handover report.
 
 STRICT RULES:
@@ -113,7 +115,7 @@ module.exports = async function handler(req, res) {
           Authorization: "Bearer " + process.env.AI_API_KEY.trim(),
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: MODEL_NAME,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: body.notes },

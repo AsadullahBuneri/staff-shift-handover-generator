@@ -24,7 +24,7 @@ The browser checks the notes and fictional-data confirmation, then sends them as
 
 - HTML, CSS, and JavaScript
 - Vercel Serverless Functions (Node.js CommonJS)
-- Groq API (`llama-3.3-70b-versatile`, OpenAI-compatible chat completions)
+- Groq API (`openai/gpt-oss-120b`, OpenAI-compatible chat completions)
 - GitHub Copilot (development assistance)
 - GitHub (source hosting)
 - Vercel (local development and deployment)
@@ -147,5 +147,5 @@ The example illustrates the expected response shape; the AI may produce differen
 - An AI model can still misunderstand notes despite safety instructions and output validation; human review is essential.
 - The fictional-data checkbox cannot detect or prevent a user from submitting real patient information.
 - Reports are not saved, authenticated, or integrated with an electronic health record.
-- The current API uses Groq and its `AI_API_KEY` server environment variable; alternate providers are not configured.
+- The current API uses Groq with the `openai/gpt-oss-120b` model and its `AI_API_KEY` server environment variable; alternate providers are not configured.
 - Future work could include automated tests, stricter report validation, configurable model/provider selection, improved accessibility testing, and organization-approved privacy and security controls before any real-world clinical use.
