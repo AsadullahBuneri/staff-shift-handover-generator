@@ -137,28 +137,6 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
-.fictional-data-confirmation {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 0 0 20px;
-  color: var(--color-muted);
-  font-size: 0.95rem;
-}
-
-.fictional-data-confirmation input {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  margin: 4px 0 0;
-  accent-color: var(--color-primary);
-}
-
-.fictional-data-confirmation label {
-  margin: 0;
-  font-weight: 400;
-}
-
 button {
   min-height: 44px;
   padding: 10px 18px;
@@ -268,7 +246,7 @@ button:disabled {
 }
 
 .report-card h3,
-.room-title {
+.bed-title {
   margin: 0 0 12px;
   color: #214b70;
   font-size: 1.15rem;
@@ -331,20 +309,6 @@ button:disabled {
   border-left: 4px solid var(--color-yellow-border);
   border-radius: 0 8px 8px 0;
   background: var(--color-yellow-bg);
-}
-
-footer {
-  margin-top: 24px;
-  padding: 16px 20px;
-  border: 1px solid #f0d991;
-  border-radius: 12px;
-  background: var(--color-yellow-bg);
-  color: #665424;
-  font-size: 0.92rem;
-}
-
-footer p {
-  margin: 0;
 }
 
 .hidden,

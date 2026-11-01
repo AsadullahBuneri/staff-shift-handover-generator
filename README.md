@@ -1,13 +1,12 @@
 # AI Shift Handover Note Generator
 
-AI Shift Handover Note Generator is a small, framework-free web app that turns rough shift notes into a structured draft organized by room. It sends submitted notes to a Vercel serverless function, which asks the Groq API to return a JSON report with a status, pending tasks, priority, and items that need human verification. The report is intended only as a drafting aid: users must verify every detail and follow their organization’s approved handover process.
+AI Shift Handover Note Generator is a small, framework-free web app that turns rough shift notes into a structured draft organized by bed. It sends submitted notes to a Vercel serverless function, which asks the Groq API to return a JSON report with a status, pending tasks, priority, and items that need human verification. The report is intended only as a drafting aid: users must verify every detail and follow their organization’s approved handover process.
 
 ## Features
 
 - Plain HTML, CSS, and browser JavaScript; no frontend framework.
 - Accepts notes up to 5,000 characters and shows a live character count.
-- Requires users to confirm that submitted notes are fictional and contain no real patient information.
-- Groups notes by room and sorts report cards by priority.
+- Groups notes by bed and sorts report cards by priority.
 - Shows patient status, pending tasks, priority, and verification items.
 - Includes example notes, clear, copy, and print controls.
 - Uses a server-side API key and returns structured JSON from the AI endpoint.
@@ -18,7 +17,7 @@ AI Shift Handover Note Generator is a small, framework-free web app that turns r
 
 **Notes → frontend → Vercel serverless function → Groq API → structured report**
 
-The browser checks the notes and fictional-data confirmation, then sends them as JSON to `/api/handover`. The serverless function validates the request, calls Groq with a low temperature and JSON response mode, validates the returned report shape, and responds with JSON. The browser renders the report as text in room cards.
+The browser checks the notes, then sends them as JSON to `/api/handover`. The serverless function validates the request, calls Groq with a low temperature and JSON response mode, validates the returned report shape, and responds with JSON. The browser renders the report as text in bed cards.
 
 ## Technologies used
 
@@ -86,7 +85,6 @@ Prerequisites: Git, Node.js with npm, and a Groq API key.
 
 - The system prompt instructs the model not to invent medical details and not to change medication names, doses, or times.
 - Ambiguous, missing, or contradictory information is directed to `needs_verification` and displayed for human review.
-- The page tells users to use fictional data only, and the UI and API require a fictional-data confirmation. This is an attestation, not automatic verification that submitted notes are fictional.
 - The API key is read on the server from `AI_API_KEY`; it is not sent in the frontend response or embedded in browser code.
 - Groq generation uses temperature `0.1` and requests JSON-only output.
 - The backend validates the JSON structure. The frontend creates DOM elements and sets report values through `textContent`, rather than inserting model output as raw HTML.
@@ -97,19 +95,19 @@ Prerequisites: Git, Node.js with npm, and a Groq API key.
 Example input (fictional):
 
 ```text
-Room 304: Fever went down, give antibiotics at 6 PM.
-Room 308: Waiting for MRI results.
-Room 312: pt restless, gave pain meds, check again later
-Room 304: BP stable now
+Bed 304: Fever went down, give antibiotics at 6 PM.
+Bed 308: Waiting for MRI results.
+Bed 312: pt restless, gave pain meds, check again later
+Bed 304: BP stable now
 ```
 
 Example output (illustrative; actual wording and prioritization may differ):
 
 ```json
 {
-  "rooms": [
+  "beds": [
     {
-      "room": "304",
+      "bed": "304",
       "status": "Fever has gone down; blood pressure is stable now.",
       "pending_tasks": ["Give antibiotics at 6 PM."],
       "priority": "Medium",
@@ -118,7 +116,7 @@ Example output (illustrative; actual wording and prioritization may differ):
       ]
     },
     {
-      "room": "308",
+      "bed": "308",
       "status": "Waiting for MRI results.",
       "pending_tasks": [],
       "priority": "Medium",
@@ -127,7 +125,7 @@ Example output (illustrative; actual wording and prioritization may differ):
       ]
     },
     {
-      "room": "312",
+      "bed": "312",
       "status": "Restless; pain meds were given.",
       "pending_tasks": ["Check again later."],
       "priority": "Medium",
@@ -145,7 +143,6 @@ The example illustrates the expected response shape; the AI may produce differen
 ## Limitations and future improvements
 
 - An AI model can still misunderstand notes despite safety instructions and output validation; human review is essential.
-- The fictional-data checkbox cannot detect or prevent a user from submitting real patient information.
 - Reports are not saved, authenticated, or integrated with an electronic health record.
 - The current API uses Groq with the `openai/gpt-oss-120b` model and its `AI_API_KEY` server environment variable; alternate providers are not configured.
 - Future work could include automated tests, stricter report validation, configurable model/provider selection, improved accessibility testing, and organization-approved privacy and security controls before any real-world clinical use.

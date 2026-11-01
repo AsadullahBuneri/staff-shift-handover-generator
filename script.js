@@ -1,6 +1,5 @@
 const notes = document.getElementById("notes");
 const notesCounter = document.getElementById("notesCounter");
-const fictionalDataConfirmation = document.getElementById("fictionalDataConfirmation");
 const generateBtn = document.getElementById("generateBtn");
 const sampleBtn = document.getElementById("sampleBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -11,13 +10,13 @@ const reportContainer = document.getElementById("reportContainer");
 const copyBtn = document.getElementById("copyBtn");
 const printBtn = document.getElementById("printBtn");
 
-const sampleNotes = `Room 304: Fever went down, give antibiotics at 6 PM.
-Room 308: Waiting for MRI results.
-Room 312: pt restless, gave pain meds, check again later
-Room 304: BP stable now`;
+const sampleNotes = `Bed 304: Fever went down, give antibiotics at 6 PM.
+Bed 308: Waiting for MRI results.
+Bed 312: pt restless, gave pain meds, check again later
+Bed 304: BP stable now`;
 const priorityOrder = { High: 0, Medium: 1, Low: 2 };
 const copyButtonLabel = copyBtn.textContent;
-let renderedRooms = [];
+let renderedBeds = [];
 let copyResetTimer;
 
 // Keep the character count visible and flag notes that exceed the API limit.
@@ -43,23 +42,23 @@ function hideError() {
 function isValidReport(report) {
   return (
     report &&
-    Array.isArray(report.rooms) &&
-    report.rooms.every(
-      (room) =>
-        room &&
-        typeof room.room === "string" &&
-        typeof room.status === "string" &&
-        Array.isArray(room.pending_tasks) &&
-        room.pending_tasks.every((task) => typeof task === "string") &&
-        Object.prototype.hasOwnProperty.call(priorityOrder, room.priority) &&
-        Array.isArray(room.needs_verification) &&
-        room.needs_verification.every((item) => typeof item === "string"),
+    Array.isArray(report.beds) &&
+    report.beds.every(
+      (bed) =>
+        bed &&
+        typeof bed.bed === "string" &&
+        typeof bed.status === "string" &&
+        Array.isArray(bed.pending_tasks) &&
+        bed.pending_tasks.every((task) => typeof task === "string") &&
+        Object.prototype.hasOwnProperty.call(priorityOrder, bed.priority) &&
+        Array.isArray(bed.needs_verification) &&
+        bed.needs_verification.every((item) => typeof item === "string"),
     )
   );
 }
 
 // Build report cards using DOM nodes and textContent, never HTML strings.
-function createRoomCard(room) {
+function createBedCard(bed) {
   const card = document.createElement("article");
   card.className = "report-card";
 
@@ -67,13 +66,13 @@ function createRoomCard(room) {
   cardHeader.className = "report-card-header";
 
   const title = document.createElement("h3");
-  title.className = "room-title";
-  title.textContent = `Room ${room.room}`;
+  title.className = "bed-title";
+  title.textContent = `Bed ${bed.bed}`;
 
   const priority = document.createElement("span");
-  priority.className = `priority-badge ${room.priority.toLowerCase()}`;
-  priority.textContent = room.priority;
-  priority.setAttribute("aria-label", `Priority: ${room.priority}`);
+  priority.className = `priority-badge ${bed.priority.toLowerCase()}`;
+  priority.textContent = bed.priority;
+  priority.setAttribute("aria-label", `Priority: ${bed.priority}`);
 
   cardHeader.append(title, priority);
   card.append(cardHeader);
@@ -83,7 +82,7 @@ function createRoomCard(room) {
   const statusHeading = document.createElement("h4");
   statusHeading.textContent = "Patient Status";
   const statusText = document.createElement("p");
-  statusText.textContent = room.status;
+  statusText.textContent = bed.status;
   statusSection.append(statusHeading, statusText);
   card.append(statusSection);
 
@@ -93,7 +92,7 @@ function createRoomCard(room) {
   tasksHeading.textContent = "Pending Tasks";
   const taskList = document.createElement("ul");
 
-  const tasks = room.pending_tasks.length > 0 ? room.pending_tasks : ["None noted"];
+  const tasks = bed.pending_tasks.length > 0 ? bed.pending_tasks : ["None noted"];
   tasks.forEach((task) => {
     const item = document.createElement("li");
     item.textContent = task;
@@ -103,14 +102,14 @@ function createRoomCard(room) {
   tasksSection.append(tasksHeading, taskList);
   card.append(tasksSection);
 
-  if (room.needs_verification.length > 0) {
+  if (bed.needs_verification.length > 0) {
     const verification = document.createElement("aside");
     verification.className = "needs-verification";
     const verificationHeading = document.createElement("h4");
     verificationHeading.textContent = "⚠️ Needs human verification";
     const verificationList = document.createElement("ul");
 
-    room.needs_verification.forEach((detail) => {
+    bed.needs_verification.forEach((detail) => {
       const item = document.createElement("li");
       item.textContent = detail;
       verificationList.append(item);
@@ -124,18 +123,18 @@ function createRoomCard(room) {
 }
 
 function renderReport(report) {
-  renderedRooms = [...report.rooms].sort(
+  renderedBeds = [...report.beds].sort(
     (first, second) => priorityOrder[first.priority] - priorityOrder[second.priority],
   );
   reportContainer.replaceChildren();
 
-  if (renderedRooms.length === 0) {
+  if (renderedBeds.length === 0) {
     const emptyMessage = document.createElement("p");
-    emptyMessage.textContent = "No patient rooms were found in these notes.";
+    emptyMessage.textContent = "No patient beds were found in these notes.";
     reportContainer.append(emptyMessage);
   } else {
-    renderedRooms.forEach((room) => {
-      reportContainer.append(createRoomCard(room));
+    renderedBeds.forEach((bed) => {
+      reportContainer.append(createBedCard(bed));
     });
   }
 
@@ -144,25 +143,25 @@ function renderReport(report) {
 
 // Create a readable clipboard version from the same sorted report data.
 function createPlainTextReport() {
-  if (renderedRooms.length === 0) {
-    return "Handover Report\n\nNo patient rooms were found in these notes.";
+  if (renderedBeds.length === 0) {
+    return "Handover Report\n\nNo patient beds were found in these notes.";
   }
 
   return [
     "Handover Report",
     "",
-    ...renderedRooms.flatMap((room) => [
-      `Room ${room.room}`,
-      `Patient Status: ${room.status}`,
-      `Priority: ${room.priority}`,
+    ...renderedBeds.flatMap((bed) => [
+      `Bed ${bed.bed}`,
+      `Patient Status: ${bed.status}`,
+      `Priority: ${bed.priority}`,
       "Pending Tasks:",
-      ...(room.pending_tasks.length
-        ? room.pending_tasks.map((task) => `- ${task}`)
+      ...(bed.pending_tasks.length
+        ? bed.pending_tasks.map((task) => `- ${task}`)
         : ["- None noted"]),
-      ...(room.needs_verification.length
+      ...(bed.needs_verification.length
         ? [
             "Needs human verification:",
-            ...room.needs_verification.map((detail) => `- ${detail}`),
+            ...bed.needs_verification.map((detail) => `- ${detail}`),
           ]
         : []),
       "",
@@ -200,7 +199,7 @@ notes.addEventListener("input", updateCharacterCount);
 
 sampleBtn.addEventListener("click", () => {
   notes.value = sampleNotes;
-  renderedRooms = [];
+  renderedBeds = [];
   reportContainer.replaceChildren();
   results.hidden = true;
   updateCharacterCount();
@@ -210,7 +209,7 @@ sampleBtn.addEventListener("click", () => {
 
 clearBtn.addEventListener("click", () => {
   notes.value = "";
-  renderedRooms = [];
+  renderedBeds = [];
   reportContainer.replaceChildren();
   results.hidden = true;
   hideError();
@@ -236,30 +235,20 @@ generateBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (!fictionalDataConfirmation.checked) {
-    showError("Confirm that the notes are fictional and contain no real patient information.");
-    fictionalDataConfirmation.focus();
-    return;
-  }
-
   generateBtn.disabled = true;
   sampleBtn.disabled = true;
   clearBtn.disabled = true;
   notes.disabled = true;
-  fictionalDataConfirmation.disabled = true;
   loading.hidden = false;
   results.hidden = true;
   reportContainer.replaceChildren();
-  renderedRooms = [];
+  renderedBeds = [];
 
   try {
     const response = await fetch("/api/handover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        notes: noteText,
-        fictionalDataConfirmed: fictionalDataConfirmation.checked,
-      }),
+      body: JSON.stringify({ notes: noteText }),
     });
 
     let report;
@@ -295,7 +284,6 @@ generateBtn.addEventListener("click", async () => {
     sampleBtn.disabled = false;
     clearBtn.disabled = false;
     notes.disabled = false;
-    fictionalDataConfirmation.disabled = false;
     loading.hidden = true;
   }
 });
