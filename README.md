@@ -28,6 +28,12 @@ The browser checks the notes, then sends them as JSON to `/api/handover`. The se
 - GitHub (source hosting)
 - Vercel (local development and deployment)
 
+## Project structure
+
+- `index.html`, `style.css`, and `script.js` provide the browser interface.
+- `api/handover.js` validates requests and communicates with the Groq API.
+- `lib/config.js` contains the model, generation settings, notes length limit, and system prompt. Change the model or system prompt there to customize report generation.
+
 ## Local setup
 
 Prerequisites: Git, Node.js with npm, and a Groq API key.
